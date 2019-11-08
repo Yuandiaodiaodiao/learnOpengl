@@ -16,20 +16,30 @@ string image1 = "../img/wall.jpg";
 string faceimg = "../img/face.png";
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+const float maxDEG=60;
+const int maxPart=3;
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+
 void processInput(GLFWwindow *window);
+
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 // timing
-float deltaTime = 0.0f;	// time between current frame and last frame
+float deltaTime = 0.0f;    // time between current frame and last frame
 float lastFrame = 0.0f;
 // settings
 
+float degree[] ={ 0.0f,
+                  0.0f,
+                  0.0f
+};
 
 int main() {
     // glfw: initialize and configure
@@ -120,15 +130,18 @@ int main() {
     glm::vec3 cubePositions[] = {
             glm::vec3(-1.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 0.0f, 0.0f)
+            glm::vec3(1.0f, 0.0f, 0.0f),
+            glm::vec3(2.0f, 0.0f, 0.0f)
 
     };
-    glm::vec3 startPositions[] = {
-            glm::vec3(-1.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 0.0f, 0.0f)
-
+    glm::mat4 lastModel[] = {
+            glm::mat4(1.0f),
+            glm::mat4(1.0f),
+            glm::mat4(1.0f),
+            glm::mat4(1.0f)
     };
+    glm::vec3 dirvec = glm::vec3(1.0f, 0.0f, 0.0f);
+    float dirlen = 1.0f;
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -224,7 +237,8 @@ int main() {
         ourShader.use();
 
         // create transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f,
+                                                100.0f);
         ourShader.setMat4("projection", projection);
 
         // camera/view transformation
@@ -233,14 +247,32 @@ int main() {
 
         // render boxes
         glBindVertexArray(VAO);
-        for (unsigned int i = 0; i <= 2; i++) {
+        for (unsigned int i = 0; i <= maxPart; i++) {
             // calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::scale(model, glm::vec3(1.0f, 0.25f, 0.25f));
-            if (i == 2) {
-                model = glm::rotate(model, glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+            if (i >= 1) {
+                glm::vec4 lastpos =  lastModel[i-1] * glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
+
+                model = glm::translate(model, glm::vec3(lastpos.x, lastpos.y, lastpos.z));
+                //旋转轴位置 取上一个model的右侧位置
+                float sumdeg=0;
+                for(int j=1;j<=i;++j){
+                    sumdeg+=degree[j];
+                }
+                model = glm::rotate(model, glm::radians(sumdeg), glm::vec3(0.0f, 0.0f, 1.0f));
+                //旋转
+                model = glm::translate(model, glm::vec3(0.5f, 0.0f, 0.0f));
+                //旋转轴距离 取边长/2
+
+//                glm::vec4 pos = model * glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
+//                cout << "x=" << pos.x << " y=" << pos.y << " z=" << pos.z << endl;
+            } else {
+                model = glm::translate(model, cubePositions[i]);
             }
-            model = glm::translate(model, cubePositions[i]);
+            model = glm::scale(model, glm::vec3(1.0f, 0.25f, 0.25f));
+
+            lastModel[i] = model;
 
 
 //            float angle = 20.0f * i;
@@ -281,6 +313,58 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+        degree[2] -= 0.1;
+
+    }
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+        degree[1] -= 0.1;
+
+    }
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+        degree[2] += 0.1;
+    }
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+        degree[1] += 0.1;
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        camera.ProcessMouseMovement(-0.5, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        camera.ProcessMouseMovement(0.5, 0);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        camera.ProcessMouseMovement(0, 0.5);
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        camera.ProcessMouseMovement(0, -0.5);
+    }
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        degree[maxPart] += 0.1;
+        for(int a=maxPart;a>=2;--a){
+            if(degree[a]>maxDEG){
+                degree[a-1]+=degree[a]-maxDEG;
+                degree[a]=maxDEG;
+            }
+        }
+        if(degree[1]>maxDEG){
+            degree[1]=maxDEG;
+        }
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        degree[maxPart] -= 0.1;
+        for(int a=maxPart;a>=2;--a){
+            if(degree[a]<-maxDEG){
+                degree[a-1]+=maxDEG+degree[a];
+                degree[a]=-maxDEG;
+            }
+        }
+        if(degree[1]<-maxDEG){
+            degree[1]=-maxDEG;
+        }
+    }
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -290,29 +374,29 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
+
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (firstMouse)
-    {
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+    if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
     }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    float mousex=xpos/SCR_WIDTH;
+    float mousey=ypos/SCR_HEIGHT;
+    cout<<"mouse x="<<xpos<<"mouse y="<<ypos<<endl;
+//    float xoffset = xpos - lastX;
+//    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+//
+//    lastX = xpos;
+//    lastY = ypos;
+//
+//    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
 }
