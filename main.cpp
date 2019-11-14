@@ -7,84 +7,17 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <SharderM.h>
-#include<CameraM.h>
-#include <iostream>
-#include <string>
-#include<map>
-#include<vector>
+#include <CameraM.h>
+#include <model.h>
 #include"bone.h"
 #include "ccd.h"
-#include <algorithm>
+#include <iostream>
 
-using namespace std;
-string image1 = "../img/wall.jpg";
-string faceimg = "../img/face.png";
-string imageMa = "../img/maCome.png";
-string maFace = "../img/maFace.png";
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-const float maxDEG = 60;
-const int maxPart = 3;
-const float changeRate = 1;
-const int iterTimes = 1000;
-float vertices[] = {
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+void initBone();
 
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+void drawBone(Bone *thisBone, const Shader &shader);
 
-        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-
-        0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-
-        0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-
-};
+void drawTarget(const Shader &shader);
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -94,227 +27,204 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 void processInput(GLFWwindow *window);
 
+unsigned int loadTexture(const char *path);
+
+void renderScene(const Shader &shader);
+
+void renderCube(int type = 0);
+
+// settings
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 720;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
+float lastX = (float) SCR_WIDTH / 2.0;
+float lastY = (float) SCR_HEIGHT / 2.0;
 bool firstMouse = true;
 
 // timing
-float deltaTime = 0.0f;    // time between current frame and last frame
+float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-// settings
 
-float degree[4][3] = {0};
-GLFWwindow *window;
-Shader *ShaderG;
-unsigned int VBO, VAO;
-unsigned int texture1, texture2, texture3, texture4;
+
+bool shadows = true;
+bool shadowsKeyPressed = false;
+string imageWall = "../img/wall.jpg";
+string faceimg = "../img/face.png";
+string imageMa = "../img/maCome.png";
+string maFace = "../img/maFace.png";
 Bone *root;
+int effector = 11111;
 glm::vec3 target(0.0f, 0.5f, 0.0f);
-int effector = 111111;
-int axisNum;
-
-int init();
-
-int loadImg(string path, unsigned int &texture);
-
-int loadImg2(string path, unsigned int &texture);
-
-void drawBone(Bone *thisBone);
-
-void drawBone(Bone *thisBone) {
-
-    Shader &ourShader = *ShaderG;
-    ourShader.setInt("texture1", 0);
-    ourShader.setInt("texture2", 1);
-    glm::mat4 previous = thisBone->M;
-    if (thisBone->parent != NULL) {
-//        vec4 endPosition = thisBone->getEndPosition();
-//        vec4 startPosition = thisBone->parent->getEndPosition();
-//        thisBone->M = glm::translate(thisBone->M, glm::vec3(0.0f, 0.0f, thisBone->parent->length));
-////
-////        thisBone->M = glm::translate(thisBone->M, glm::vec3(startPosition.x,startPosition.y,startPosition.z));
-//
-//        thisBone->M = glm::rotate(thisBone->M, thisBone->rotation.x,
-//                                  glm::vec3(thisBone->M * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f)));
-//        thisBone->M = glm::rotate(thisBone->M, thisBone->rotation.y,
-//                                  glm::vec3(thisBone->M * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
-//        thisBone->M = glm::rotate(thisBone->M, thisBone->rotation.z,
-//                                  glm::vec3(thisBone->M * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f)));
-////
-//        thisBone->M = thisBone->parent->M * thisBone->M;
-        thisBone->M = thisBone->getTransform();
-
-
-    } else {
-//        thisBone->M = glm::rotate(thisBone->M, thisBone->rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-//        thisBone->M = glm::rotate(thisBone->M, thisBone->rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-//        thisBone->M = glm::rotate(thisBone->M, thisBone->rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-        thisBone->M = thisBone->getTransform();
-    }
-
-    int have = 0;
-    for (std::vector<Bone *>::iterator it = thisBone->bones.begin(); it != thisBone->bones.end(); it++) {
-        drawBone(*it);
-        have = 1;
-    }
-    if (thisBone->parent != nullptr) {
-        if (have == 0) {
-            thisBone->M = glm::scale(thisBone->M, glm::vec3(0.125f, 0.125f, 0.5f));
-
-        }
-        ourShader.setMat4("model", thisBone->M);
-//        cout << "(" << thisBone->M[3].y << "," << thisBone->M[3].z << ") ";
-        if (have == 0) {
-            ourShader.setInt("texture1", 3);
-            ourShader.setInt("texture2", 3);
-            glDrawArrays(GL_TRIANGLES, 36, 48);
-        } else {
-            ourShader.setInt("texture1", 0);
-            ourShader.setInt("texture2", 1);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        }
-    }
-    thisBone->M = previous;
-}
-
-void drawTarget();
-
-void drawTarget() {
-    Shader &ourShader = *ShaderG;
-    ourShader.setInt("texture1", 2);
-    ourShader.setInt("texture2", 2);
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::vec3 tartemp = glm::vec3(target.x, -target.z, target.y);
-    model = glm::translate(model, target);
-    cout << "now pos= " << tartemp.x << " " << tartemp.y << " " << tartemp.z << endl;
-    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 0.125f));
-    ourShader.setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-}
+const int iterTimes = 100;
+// camera
 
 int main() {
-    for (int i = 0; i <= 35; i++) {
-        for (int j = 0; j <= 4; j++) {
-            if (j == 2 && j <= 2) {
-                vertices[i * 5 + j] += 0.5f;
-//                vertices[i*5+j]/=2;
-            }
-        }
+    initBone();
+    // glfw: initialize and configure
+    // ------------------------------
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
+#endif
+
+    // glfw window creation
+    // --------------------
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    if (window == NULL) {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // glad: load all OpenGL function pointers
+    // ---------------------------------------
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
     }
 
-    for (int i = 0; i <= 35; i++) {
-        for (int j = 0; j <= 4; j++) {
-            if (j != 2 && j <= 2) {
-                vertices[i * 5 + j] /= 8;
-            }
-        }
-    }
-    root = new Bone(0);
-    init();
+    // configure global opengl state
+    // -----------------------------
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    // build and compile shaders
+    // -------------------------
+    Shader shader("../shader/3.2.2.point_shadows.vs", "../shader/3.2.2.point_shadows.fs");
+    Shader simpleDepthShader("../shader/3.2.2.point_shadows_depth.vs", "../shader/3.2.2.point_shadows_depth.fs",
+                             "../shader/3.2.2.point_shadows_depth.gs");
+
+    // load textures
+    // -------------
+    unsigned int woodTexture = loadTexture(imageWall.c_str());
+    unsigned int maTexture = loadTexture(imageMa.c_str());
+    unsigned int mafaceTexture = loadTexture(maFace.c_str());
+
+    // configure depth map FBO
+    // -----------------------
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // create depth cubemap texture
+    unsigned int depthCubemap;
+    glGenTextures(1, &depthCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0,
+                     GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-    Shader &ourShader = *ShaderG;
-    // world space positions of our cubes
-    glm::vec3 cubePositions[] = {
-            glm::vec3(-1.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 0.0f, 0.0f),
-            glm::vec3(2.0f, 0.0f, 0.0f)
+    // shader configuration
+    // --------------------
+    shader.use();
+    shader.setInt("diffuseTexture", 0);
+    shader.setInt("depthMap", 1);
 
-    };
-    glm::mat4 lastModel[] = {
-            glm::mat4(1.0f),
-            glm::mat4(1.0f),
-            glm::mat4(1.0f),
-            glm::mat4(1.0f)
-    };
-    glm::vec3 dirvec = glm::vec3(1.0f, 0.0f, 0.0f);
+    // lighting info
+    // -------------
+    glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)) {
-        // input
-        // -----
+        // per-frame time logic
+        // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        // input
+        // -----
         processInput(window);
+
+        // move light position over time
+        lightPos.z = sin(glfwGetTime() * 0.5) * 3.0;
+
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
-        // bind textures on corresponding texture units
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, texture3);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, texture4);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // activate shader
-        ourShader.use();
+        // 0. create depth cubemap transformation matrices
+        // -----------------------------------------------
+        float near_plane = 1.0f;
+        float far_plane = 25.0f;
+        glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float) SHADOW_WIDTH / (float) SHADOW_HEIGHT,
+                                                near_plane, far_plane);
+        std::vector<glm::mat4> shadowTransforms;
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f),
+                                                            glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f),
+                                                            glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f),
+                                                            glm::vec3(0.0f, 0.0f, 1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f),
+                                                            glm::vec3(0.0f, 0.0f, -1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f),
+                                                            glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f),
+                                                            glm::vec3(0.0f, -1.0f, 0.0f)));
 
-        // create transformations
+        // 1. render scene to depth cubemap
+        // --------------------------------
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        simpleDepthShader.use();
+        for (unsigned int i = 0; i < 6; ++i)
+            simpleDepthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+        simpleDepthShader.setFloat("far_plane", far_plane);
+        simpleDepthShader.setVec3("lightPos", lightPos);
+        renderScene(simpleDepthShader);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        ccd::findNewAngles(root->bone(effector), target, iterTimes);
+        // 2. render scene as normal
+        // -------------------------
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        shader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f,
                                                 100.0f);
-        ourShader.setMat4("projection", projection);
-
-        // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
-        ourShader.setMat4("view", view);
-
-        // render boxes
-        glBindVertexArray(VAO);
-
-        cout << "boneM.y=";
-        drawBone(root);
-        cout << endl;
-        drawTarget();
-
-//        for (unsigned int i = 0; i <= maxPart; i++) {
-//            // calculate the model matrix for each object and pass it to shader before drawing
-//            glm::mat4 model = glm::mat4(1.0f);
-//
-//            if (i >= 1) {
-//                //移动至上一个方块的末端
-//                glm::vec4 lastpos = lastModel[i - 1] * glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
-//
-//                model = glm::translate(model, glm::vec3(lastpos.x, lastpos.y, lastpos.z));
-//                //旋转轴位置 取上一个model的右侧位置
-//                for (int axis = 0; axis <= 2; ++axis) {
-//                    float sumdeg = 0;
-//                    for (int j = 1; j <= i; ++j) {
-//                        sumdeg += degree[j][axis];
-//                    }
-//                    model = glm::rotate(model, glm::radians(sumdeg),
-//                                        glm::vec3(axis == 0 ? 1 : 0, axis == 1 ? 1 : 0, axis == 2 ? 1 : 0));
-//                }
-//                //旋转 定位至转轴
-//                model = glm::translate(model, glm::vec3(0.5f, 0.0f, 0.0f));
-//                //旋转轴距离 取边长/2
-//
-////                glm::vec4 pos = model * glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
-////                cout << "x=" << pos.x << " y=" << pos.y << " z=" << pos.z << endl;
-//            } else {
-//                model = glm::translate(model, cubePositions[i]);
-//            }
-//            //压缩长宽
-//            model = glm::scale(model, glm::vec3(1.0f, 0.25f, 0.25f));
-//
-//            //保存旋转矩阵
-//            lastModel[i] = model;
-//
-//
-////            float angle = 20.0f * i;
-////            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-//            ourShader.setMat4("model", model);
-//
-////            glDrawArrays(GL_TRIANGLES, 0, 36);
-//        }
+        shader.setMat4("projection", projection);
+        shader.setMat4("view", view);
+        // set lighting uniforms
+        shader.setVec3("lightPos", lightPos);
+        shader.setVec3("viewPos", camera.Position);
+        shader.setInt("shadows", shadows); // enable/disable shadows by pressing 'SPACE'
+        shader.setFloat("far_plane", far_plane);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, woodTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, maTexture);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, mafaceTexture);
+        renderScene(shader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -322,22 +232,246 @@ int main() {
         glfwPollEvents();
     }
 
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-int partnum = maxPart;
+void drawBone(Bone *thisBone, const Shader &shader) {
+    int have = 0;
+    for (std::vector<Bone *>::iterator it = thisBone->bones.begin(); it != thisBone->bones.end(); it++) {
+        drawBone(*it, shader);
+        have = 1;
+    }
+    glm::mat4 model = thisBone->getTransform();
+    if (thisBone->parent != nullptr) {
+        if (have == 0) {
+            model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.5f));
+        } else {
+            model = glm::scale(model, glm::vec3(0.125f, 0.125f, 0.5f));
+        }
+        shader.setMat4("model", model);
+//        cout << "(" << thisBone->M[3].y << "," << thisBone->M[3].z << ") ";
+        if (have == 0) {
+            shader.setInt("diffuseTexture", 3);
+            renderCube(2);
+            shader.setInt("diffuseTexture", 0);
+        } else {
+            renderCube(1);
+        }
+    }
+}
+
+void drawTarget(const Shader &shader) {
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, target);
+    model = glm::scale(model, glm::vec3(0.125f, 0.125f, 0.125f));
+    shader.setMat4("model", model);
+    shader.setInt("diffuseTexture", 2);
+    renderCube(1);
+    shader.setInt("diffuseTexture", 0);
+}
+
+// renders the 3D scene
+// --------------------
+void renderScene(const Shader &shader) {
+    // room cube
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(5.0f));
+    shader.setMat4("model", model);
+    glDisable(
+            GL_CULL_FACE); // note that we disable culling here since we render 'inside' the cube instead of the usual 'outside' which throws off the normal culling methods.
+    shader.setInt("reverse_normals",
+                  1); // A small little hack to invert normals when drawing cube from the inside so lighting still works.
+    renderCube();
+    shader.setInt("reverse_normals", 0); // and of course disable it
+    glEnable(GL_CULL_FACE);
+    // cubes
+    drawBone(root, shader);
+    drawTarget(shader);
+//    model = glm::mat4(1.0f);
+//    model = glm::translate(model, glm::vec3(4.0f, -3.5f, 0.0));
+//    model = glm::scale(model, glm::vec3(0.5f));
+//    shader.setMat4("model", model);
+//    renderCube();
+//    model = glm::mat4(1.0f);
+//    model = glm::translate(model, glm::vec3(2.0f, 3.0f, 1.0));
+//    model = glm::scale(model, glm::vec3(0.75f));
+//    shader.setMat4("model", model);
+//    renderCube();
+//    model = glm::mat4(1.0f);
+//    model = glm::translate(model, glm::vec3(-3.0f, -1.0f, 0.0));
+//    model = glm::scale(model, glm::vec3(0.5f));
+//    shader.setMat4("model", model);
+//    renderCube();
+//    model = glm::mat4(1.0f);
+//    model = glm::translate(model, glm::vec3(-1.5f, 1.0f, 1.5));
+//    model = glm::scale(model, glm::vec3(0.5f));
+//    shader.setMat4("model", model);
+//    renderCube();
+//    model = glm::mat4(1.0f);
+//    model = glm::translate(model, glm::vec3(-1.5f, 2.0f, -3.0));
+//    model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+//    model = glm::scale(model, glm::vec3(0.75f));
+//    shader.setMat4("model", model);
+//    renderCube();
+}
+
+// renderCube() renders a 1x1 3D cube in NDC.
+// -------------------------------------------------
+unsigned int cubeVAO = 0;
+unsigned int cubeVBO = 0;
+
+void renderCube(int type) {
+    // initialize (if necessary)
+    if (cubeVAO == 0) {
+        float vertices[] = {
+                // back face
+                -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, // top-left
+                // front face
+                -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+                1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+                -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // top-left
+                -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+                // left face
+                -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+                -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-left
+                -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+                // right face
+                1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+                // bottom face
+                -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top-left
+                1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+                1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+                -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+                // top face
+                -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+                1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+                1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
+                1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+                -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+                -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
+
+
+                // back face
+                -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, // top-left
+                // front face
+                -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+                1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+                -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // top-left
+                -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+                // left face
+                -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+                -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-left
+                -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+                // right face
+                1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+                // bottom face
+                -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top-left
+                1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+                1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+                -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+                // top face
+                -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+                1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+                1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
+                1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+                -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+                -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
+
+                0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.5f,
+                0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+                0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+
+                0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+                0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+
+
+
+
+
+        };
+
+        for (int i = 36; i <= 71; i++) {
+            for (int j = 0; j <= 7; j++) {
+                if (j == 2 && j <= 2) {
+                    vertices[i * 8 + j] += 1.0f;
+//                vertices[i*5+j]/=2;
+                }
+            }
+        }
+        glGenVertexArrays(1, &cubeVAO);
+        glGenBuffers(1, &cubeVBO);
+        // fill buffer
+        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        // link vertex attributes
+        glBindVertexArray(cubeVAO);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+    // render Cube
+    glBindVertexArray(cubeVAO);
+    if (type == 0) {
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    } else if (type == 1) {
+        glDrawArrays(GL_TRIANGLES, 36, 72);
+    }else if(type==2){
+        glDrawArrays(GL_TRIANGLES, 72, 84);
+    }
+    glBindVertexArray(0);
+}
+
 map<int, int> lastKey;
 
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -345,7 +479,6 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         control = 1;
     }
-
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && control == -1)
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && control == -1)
@@ -359,67 +492,14 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && control == 1)
         camera.ProcessKeyboard(DOWN, deltaTime);
 
-    if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS && lastKey[GLFW_KEY_EQUAL] == GLFW_RELEASE) {
-        partnum = std::min(partnum + 1, maxPart);
-        axisNum = std::min(axisNum * 10 + 1, effector);
-        cout << "axisNum=" << axisNum << endl;
-//        root->bone(1)->rotate(-0.1f, 0.0f, 0.0f);
 
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !shadowsKeyPressed) {
+        shadows = !shadows;
+        shadowsKeyPressed = true;
     }
-    if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS && lastKey[GLFW_KEY_MINUS] == GLFW_RELEASE) {
-        partnum = std::max(partnum - 1, 1);
-        axisNum = std::max(axisNum / 10, 0);
-        cout << "axisNum=" << axisNum << endl;
-//        root->bone(11)->rotate(-0.1f, 0.0f, 0.0f);
-
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) {
+        shadowsKeyPressed = false;
     }
-    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && lastKey[GLFW_KEY_ENTER] == GLFW_RELEASE) {
-        ccd::findNewAngles(root->bone(effector), target, iterTimes);
-    }
-    lastKey[GLFW_KEY_ENTER] = glfwGetKey(window, GLFW_KEY_ENTER);
-    lastKey[GLFW_KEY_EQUAL] = glfwGetKey(window, GLFW_KEY_EQUAL);
-    lastKey[GLFW_KEY_MINUS] = glfwGetKey(window, GLFW_KEY_MINUS);
-    int shift = 1;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
-        shift = -1;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        shift = -1;
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS) {
-        shift = -1;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
-        shift = -1;
-    }
-    if (axisNum == 0) {
-        ccd::findNewAngles(root->bone(effector), target, 50);
-    }
-    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
-        if (axisNum == 0) {
-            target.x += shift * deltaTime;
-        } else {
-            root->bone(axisNum)->rotate(shift * deltaTime, 0.0f, 0.0f);
-        }
-        degree[partnum][0] += changeRate * shift;
-    }
-    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-        if (axisNum == 0) {
-            target.y += shift * deltaTime;
-        } else {
-            root->bone(axisNum)->rotate(0.0f, shift * deltaTime, 0.0f);
-        }
-        degree[partnum][1] += changeRate * shift;
-    }
-    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-        if (axisNum == 0) {
-            target.z += shift * deltaTime;
-        } else {
-            root->bone(axisNum)->rotate(0.0f, 0.0f, shift * deltaTime);
-        }
-        degree[partnum][2] += changeRate * shift;
-    }
-
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
         camera.ProcessMouseMovement(-deltaTime * 1500, 0);
     }
@@ -433,46 +513,6 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         camera.ProcessMouseMovement(0, -deltaTime * 1000);
     }
-    for (int a = maxPart; a >= 1; --a) {
-        for (int degaxis = 0; degaxis <= 2; ++degaxis) {
-            if (degree[a][degaxis] > maxDEG) {
-//                degree[a - 1][degaxis] += degree[a][degaxis] - maxDEG;
-                degree[a][degaxis] = maxDEG;
-            }
-        }
-    }
-    for (int a = maxPart; a >= 1; --a) {
-        for (int degaxis = 0; degaxis <= 2; ++degaxis) {
-            if (degree[a][degaxis] < -maxDEG) {
-//                degree[a - 1][degaxis] += degree[a][degaxis] + maxDEG;
-                degree[a][degaxis] = -maxDEG;
-            }
-        }
-    }
-//    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-//        degree[maxPart] += changeRate;
-//        for (int a = maxPart; a >= 2; --a) {
-//            if (degree[a] > maxDEG) {
-//                degree[a - 1] += degree[a] - maxDEG;
-//                degree[a] = maxDEG;
-//            }
-//        }
-//        if (degree[1] > maxDEG) {
-//            degree[1] = maxDEG;
-//        }
-//    }
-//    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-//        degree[maxPart] -= changeRate;
-//        for (int a = maxPart; a >= 2; --a) {
-//            if (degree[a] < -maxDEG) {
-//                degree[a - 1] += maxDEG + degree[a];
-//                degree[a] = -maxDEG;
-//            }
-//        }
-//        if (degree[1] < -maxDEG) {
-//            degree[1] = -maxDEG;
-//        }
-//    }
 
 }
 
@@ -492,18 +532,24 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
         lastY = ypos;
         firstMouse = false;
     }
-    float mousex = (xpos-lastX) / SCR_WIDTH;
-    float mousey = (lastY-ypos) / SCR_HEIGHT;
-//    cout<<"mouse x="<<xpos<<"mouse y="<<ypos<<endl;
-//    float xoffset = xpos - lastX;
-//    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-//
-    target+=camera.Right*mousex;
-    target+=glm::vec3(0.0f, 1.0f, 0.0f) *mousey;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    } else {
+        float mousex = (xpos - lastX) / SCR_WIDTH;
+        float mousey = (lastY - ypos) / SCR_HEIGHT;
+
+        target += camera.Right * mousex;
+        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+            target += camera.Front * mousey;
+        } else {
+            target += glm::vec3(0.0f, 1.0f, 0.0f) * mousey;
+        }
+
+    }
     lastX = xpos;
     lastY = ypos;
-//
-//    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
@@ -512,147 +558,49 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
 }
 
-int init() {
+// utility function for loading a 2D texture from file
+// ---------------------------------------------------
+unsigned int loadTexture(char const *path) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
 
-    axisNum = effector;
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data) {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE
+                                                                            : GL_REPEAT); // for this tutorial: use GL_CLAMP_TO_EDGE to prevent semi-transparent borders. Due to interpolation it takes texels from next repeat
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    } else {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
+
+void initBone() {
+    root = new Bone(0);
     Bone *temp = root;
+    int axisNum = effector;
     while (axisNum > 0) {
         target.z += 0.8f;
         axisNum /= 10;
         temp = temp->add(new Bone(1));
     }
-    axisNum = 0;
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
-    if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    // glad: load all OpenGL function pointers
-    // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-    glEnable(GL_DEPTH_TEST);
-    // build and compile our shader zprogram
-    // ------------------------------------
-    ShaderG = new Shader("../6.3.coordinate_systems.vs", "../6.3.coordinate_systems.fs");
-    Shader &ourShader = *ShaderG;
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
-    glEnableVertexAttribArray(0);
-    // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    stbi_set_flip_vertically_on_load(true);
-    loadImg(image1, texture1);
-    loadImg(faceimg, texture2);
-//    loadImg(faceimg,texture2);
-    loadImg(imageMa, texture3);
-    loadImg(maFace, texture4);
-//    glGenTextures(1, &texture1);
-//    glBindTexture(GL_TEXTURE_2D, texture1);
-//    // set the texture wrapping parameters
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//    // set texture filtering parameters
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-//    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-//    unsigned char *data = stbi_load(image1.c_str(), &width, &height, &nrChannels, 0);
-//    if (data)
-//    {
-//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-//        glGenerateMipmap(GL_TEXTURE_2D);
-//    }
-//    else
-//    {
-//        std::cout << "Failed to load texture" << std::endl;
-//    }
-//    stbi_image_free(data);
-    // texture 2
-    // ---------
-
-
-    // texture 2
-    // ---------
-
-
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
-    ourShader.use();
-    ourShader.setInt("texture1", 0);
-    ourShader.setInt("texture2", 1);
-}
-
-int loadImg(string path, unsigned int &texture) {
-    int width, height, nrChannels;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
-    if (data) {
-        if (path.find(".png") != -1) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        } else {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        }
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-    return 0;
-}
-
-int loadImg2(string path, unsigned int &texture) {
-    int width, height, nrChannels;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
-    if (data) {
-        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-    return 0;
 }

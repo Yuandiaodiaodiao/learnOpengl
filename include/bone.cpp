@@ -28,7 +28,7 @@ Bone::Bone(float l) {
     coordinates = glm::vec3(0.0f);
     constraint[0] = glm::vec3(-360.0f);
     constraint[1] = glm::vec3(360.0f);
-    rotateLimit = glm::vec3(RAD(180));
+    rotateLimit = glm::vec3(999);
 };
 
 Bone::Bone(const Bone &b) {
@@ -107,14 +107,14 @@ Bone *Bone::setRotate(float x, float y, float z) {
     rotation.x = lx;
     rotation.y = ly;
     rotation.z = lz;
-//
-//    if (rotation.x > rotateLimit.x)rotation.x = rotateLimit.x;
-//    if (rotation.y > rotateLimit.y)rotation.y = rotateLimit.y;
-//    if (rotation.z > rotateLimit.z)rotation.z = rotateLimit.z;
-//
-//    if (rotation.x < -rotateLimit.x)rotation.x = -rotateLimit.x;
-//    if (rotation.y < -rotateLimit.y)rotation.y = -rotateLimit.y;
-//    if (rotation.z < -rotateLimit.z)rotation.z = -rotateLimit.z;
+
+    if (rotation.x > rotateLimit.x)rotation.x = rotateLimit.x;
+    if (rotation.y > rotateLimit.y)rotation.y = rotateLimit.y;
+    if (rotation.z > rotateLimit.z)rotation.z = rotateLimit.z;
+
+    if (rotation.x < -rotateLimit.x)rotation.x = -rotateLimit.x;
+    if (rotation.y < -rotateLimit.y)rotation.y = -rotateLimit.y;
+    if (rotation.z < -rotateLimit.z)rotation.z = -rotateLimit.z;
 
     return this;
 }
